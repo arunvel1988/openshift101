@@ -222,35 +222,7 @@ You can also dive in a bit deeper - the `Events` tab is very useful for identify
 
 You'll want to refer to this view throughout the lab. Almost all actions we take in in OpenShift will result in an event being fired in this view. As it is updated real-time, it's a great way to track changes to state.
 
-# Exercise 3: Metrics and dashboards
-
-In this exercise, we'll explore the third-party monitoring and metrics dashboards that are installed for free with OpenShift!
-
-## Grafana
-
-Red Hat OpenShift on IBM Cloud comes with [Grafana](https://grafana.com/) preinstalled. Get started by switching to the Administrator view:
-
-![Administrator](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/switch-to-admin.png)
-
-Then Navigate to `Monitoring > Dashboards` in the left-hand bar. You'll be asked to login with OpenShift and then click through some permissions.
-
-![Monitoring Dashboards](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/dashboard-menu.png)
-
-This will open up another proxy page, click `Log in with OpenShift`.
-
-Next, it will ask you for `Authorize Access`, take the default which is both checkboxes, and click `Allow selected permissions`.
-
-You should then see your Grafana dashboard. Hit `Home` on the top left, and choose `K8s / Compute Resources / Namespace (Pods)`.
-
-![Grafana](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/grafana-namespace.png)
-
-Choose the name of the project you created in [Step 1](exercise-2.md#deploy-example-health) - the same one that your application is running inside.
-
-You should be able to see the CPU and Memory usage for your application. In production environments, this is helpful for identifying the average amount of CPU or Memory your application uses, especially as it can fluctuate through the day. We'll use this information in the next exercise to set up auto-scaling for our pods.
-
-![Grafana also project](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/grafana-example-health.png)
-
-# Exercise 4: Scaling the application
+# Exercise 3: Scaling the application
 
 In this exercise, we'll leverage the metrics we've observed in the previous step to automatically scale our UI application in response to load.
 
@@ -332,7 +304,7 @@ Start simulating load by hitting the page several times, or running the script. 
 
 That's it! You now have a highly available and automatically scaled front-end Node.js application. OpenShift is automatically scaling your application pods since the CPU usage of the pods greatly exceeded `1`% of the resource limit, `30` millicores.
 
-# Exercise 5: Health checks
+# Exercise 4: Health checks
 
 In Kubernetes, liveness and readiness probes are essential for smoothly running applications.
 A probe is generally a REST `GET` call, but there are other types of probes available.
@@ -397,7 +369,7 @@ Dive into your events and you'll see that the probe is failing, causing the plat
 
 Using health checks gives your OpenShift service layer better reliability and helps you start with a strong foundation.
 
-# Exercise 6: Deploy a Node application with Build Config (CLI version)
+# Exercise 5: Deploy a Node application with Build Config (CLI version)
 
 In this exercise we'll revisit the application from exercise 1, except we'll use equivalent CLI commands to deploy our "Example Health" application.
 
