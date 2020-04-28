@@ -29,13 +29,15 @@ cd node-build-config-openshift
 
 > **NOTE** you may use the *Copy* button for these commands, but please remember to *Paste* them back in the terminal and hit *Enter*.
 
-Let's take a look at the `Dockerfile` in the application's root directory. A `Dockerfile` tells us how our application is being containerized, this is important in the next step as we'll be building an image to save and deploy in an OpenShift container.
+Let's start by taking a look at the `Dockerfile` in the application's root directory. A `Dockerfile` tells us how our application is being containerized, this is important in the next step as we'll be building an image to save and deploy in an OpenShift container. To view the `Dockerfile` you can use the `cat` command below or use the embedded IDE as shown in the image below.
 
 ```bash
 cat Dockerfile
 ```
 
 {: codeblock}
+
+![Open Dockerfile](https://raw.githubusercontent.com/IBM/openshift101/skills-network-ql/workshop/.gitbook/assets/dockerfile.png)
 
 Let's go through each line and read the corresponding comments.
 
