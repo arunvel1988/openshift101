@@ -4,19 +4,15 @@ Welcome to our OpenShift 101 quick lab!
 
 **So what is OpenShift?**
 
-To quote Wikipedia:
+OpenShift is an open source container application platform based on the Kubernetes container orchestrator for enterprise application development and deployment. In this workshop we'll be using an OpenShift cluster on IBM’s public cloud. OpenShift provides a way to empower developers to deploy code and not worry about the underlying ecosystem.
 
-> OpenShift is a family of containerization software developed by Red Hat. Its flagship product is the OpenShift Container Platform-an on-premises platform as a service built around Docker containers orchestrated and managed by Kubernetes on a foundation of Red Hat Enterprise Linux.
-
-But the short of it? It's a abstraction layer **ON TOP** of Kubernetes. It's a way to empower Developers to deploy code and not worry about a lot of the underlying ecosystem. This workshop should show you the happy path to take advantage of most of the best parts of OpenShift and what it can offer.
-
-The goal of this quick lab are have a user familiarize themselves with OpenShift by deploying a simple Node.js application.
+This workshop will show you a happy path to take advantage of most of the best parts of OpenShift and what it can offer. Specifically, this quick lab will show how a developer can use OpenShift to deploy a sample Node.js application.
 
 **Let's get started!**
 
 # Quick Lab: Deploy a Node.js application
 
-In this exercise we'll deploy a Node.js application using OpenShift's CLI. We'll be using the ["Example Health"](https://github.com/IBM/node-s2i-openshift/) application.
+In this exercise we'll deploy a Node.js application using OpenShift's Command Line Interface (CLI). We'll be using the ["Example Health"](https://github.com/IBM/node-s2i-openshift/) application.
 
 From the editor's menu bar, choose the *Terminal* menu and click on *New Terminal*.
 
@@ -30,6 +26,8 @@ First, clone the *Example Health* source code and change to that directory.
 git clone https://github.com/IBM/node-build-config-openshift
 cd node-build-config-openshift
 ```
+
+> **NOTE** you may use the *Copy* button for these commands, but please remember to *Paste* them back in the terminal and hit *Enter*.
 
 Let's take a look at the `Dockerfile` in the application's root directory. A `Dockerfile` tells us how our application is being containerized, this is important in the next step as we'll be building an image to save and deploy in an OpenShift container.
 
@@ -64,7 +62,7 @@ CMD [ "npm", "start" ]
 
 ## Build a new image
 
-Build your application's image by running the `oc new-build` command from your source code root directory. This will create a Build and an ImageStream of the app.
+Build your application's image by running the `oc new-build` command from your source code root directory. This will create a *Build* and an *ImageStream* of the app.
 
 ```bash
 oc new-build --strategy docker --binary --docker-image node:10 --name example-health
@@ -89,6 +87,8 @@ oc new-build --strategy docker --binary --docker-image node:10 --name example-he
 ```
 
 Start a new build using the `oc start-build` command.
+
+> **NOTE**: This command can take up to a minute to complete, please be patient!
 
 ```bash
 oc start-build example-health --from-dir . --follow
@@ -117,7 +117,7 @@ Pushed 12/12 layers, 100% complete
 
 ## Deploy the application
 
-Now that we have our build, we can choose to deploy the application by running `oc new-app`.
+Now that we have our build, we can choose to deploy the application by running `oc new-app`. In this case we use the `-i` tag to indicate the image name.
 
 ```bash
 oc new-app -i example-health
@@ -143,13 +143,13 @@ $ oc new-app -i example-health
     Run 'oc status' to view your app.
 ```
 
-Expose the service using `oc expose`, a route will be created.
+Expose the service using `oc expose`, a route will be created. This allows our application to be accessed from the outside world, it will give us a fully qualified URL to access our running application.
 
 ```bash
 oc expose svc/example-health
 ```
 
-Find the application's route by running `oc get routes`.
+Find the application's route by running `oc get routes`. This should return a fully qualified URL that we can access from any device.
 
 ```bash
 oc get routes
@@ -170,4 +170,15 @@ Copy the application's URL into a browser and login with the username and passwo
 
 ![Example Health details](https://raw.githubusercontent.com/IBM/openshift101/skills-network-ql/workshop/.gitbook/assets/example-health-app.png)
 
-**Congratulations** on completing this workshop!
+# Quick Lab: Congratulations on deploying your first application on OpenShift
+
+**Congratulations** on completing this quick lab, we hope you enjoyed it!
+
+Here's a quick recap of what you did:
+
+* Cloned a repository with sample code and a Dockerfile
+* Built and pushed a new image to OpenShift's internal registry
+* Deployed the application in a pod
+* Exposed the app with a route
+
+When you're ready to  go on to [Lab 2a]() to learn about OpenShift and Quarkus.
