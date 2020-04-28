@@ -1,6 +1,6 @@
-# OpenShift Quick Lab
+# OpenShift Basics Quick Lab
 
-Welcome to our OpenShift 101 quick lab!
+Welcome to our OpenShift Basics quick lab!
 
 **So what is OpenShift?**
 
@@ -201,4 +201,16 @@ Here's a quick recap of what you did:
 * Deployed the application in a pod
 * Exposed the app with a route
 
-When you're ready to  go on to [Lab 2a]() to learn about OpenShift and Quarkus.
+Before moving on to the next lab let's clean up our workspace by running these commands:
+
+```
+oc delete dc example-health
+oc delete svc example-health
+oc delete bc example-health
+oc delete route example-health
+oc delete imagestream example-health
+```
+
+{: codeblock}
+
+Now that we're done cleaning up, move on to [Lab 2a]() to learn about OpenShift and Quarkus.
