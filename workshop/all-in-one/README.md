@@ -35,6 +35,8 @@ Let's take a look at the `Dockerfile` in the application's root directory. A `Do
 cat Dockerfile
 ```
 
+{: codeblock}
+
 Let's go through each line and read the corresponding comments.
 
 ```Dockerfile
@@ -68,6 +70,8 @@ Build your application's image by running the `oc new-build` command from your s
 oc new-build --strategy docker --binary --docker-image node:10 --name example-health
 ```
 
+{: codeblock}
+
 The output should look like below:
 
 ```bash
@@ -93,6 +97,8 @@ Start a new build using the `oc start-build` command.
 ```bash
 oc start-build example-health --from-dir . --follow
 ```
+
+{: codeblock}
 
 The output should look like below:
 
@@ -123,6 +129,8 @@ Now that we have our build, we can choose to deploy the application by running `
 oc new-app -i example-health
 ```
 
+{: codeblock}
+
 The output should look like below:
 
 ```bash
@@ -149,11 +157,15 @@ Expose the service using `oc expose`, a route will be created. This allows our a
 oc expose svc/example-health
 ```
 
+{: codeblock}
+
 Find the application's route by running `oc get routes`. This should return a fully qualified URL that we can access from any device.
 
 ```bash
 oc get routes
 ```
+
+{: codeblock}
 
 The output should look like below:
 
