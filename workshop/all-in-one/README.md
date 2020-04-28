@@ -10,6 +10,8 @@ This workshop will show you a happy path to take advantage of most of the best p
 
 **Let's get started!**
 
+---
+
 # Quick Lab: Deploy a Node.js application
 
 In this exercise we'll deploy a Node.js application using OpenShift's Command Line Interface (CLI). We'll be using the ["Example Health"](https://github.com/IBM/node-s2i-openshift/) application.
@@ -185,6 +187,8 @@ example-health   example-health-example-health-ns.aida-dev-apps-10-30-f2c6cdc680
 Copy the application's URL into a browser and login with the username and password `admin`:`test`.
 
 ![Example Health details](https://raw.githubusercontent.com/IBM/openshift101/skills-network-ql/workshop/.gitbook/assets/example-health-app.png)
+
+---
 
 # Quick Lab: Congratulations on deploying your first application on OpenShift
 
