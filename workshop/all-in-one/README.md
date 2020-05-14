@@ -1,22 +1,16 @@
-# OpenShift 101
+# OpenShift 101 Lab
 
-Welcome to our OpenShift 101 digital workshop!
+Welcome to our OpenShift 101 Lab
 
 **So what is OpenShift?**
 
-To quote Wikipedia:
+OpenShift is an open source container application platform based on the Kubernetes container orchestrator for enterprise application development and deployment. In this workshop we'll be using an OpenShift cluster on IBM’s public cloud. OpenShift provides a way to empower developers to deploy code and not worry about the underlying ecosystem.
 
-> OpenShift is a family of containerization software developed by Red Hat. Its flagship product is the OpenShift Container Platform-an on-premises platform as a service built around Docker containers orchestrated and managed by Kubernetes on a foundation of Red Hat Enterprise Linux.
-
-But the short of it? It's a abstraction layer **ON TOP** of Kubernetes. It's a way to empower Developers to deploy code and not worry about a lot of the underlying ecosystem. This workshop should show you the happy path to take advantage of most of the best parts of OpenShift and what it can offer.
-
-The goals of this workshop are:
-
-* To familiarize the reader with OpenShift
-* Deploy a Node.js application to OpenShift
-* Use OpenShift's features to monitor, scale the application
+This workshop will show you a happy path to take advantage of most of the best parts of OpenShift and what it can offer. Specifically, this quick lab will show how a developer can use OpenShift to deploy a sample Node.js application.
 
 **Let's get started!**
+
+---
 
 # Exercise 1: Deploy a Node application with Source-to-Image
 
@@ -222,35 +216,7 @@ You can also dive in a bit deeper - the `Events` tab is very useful for identify
 
 You'll want to refer to this view throughout the lab. Almost all actions we take in in OpenShift will result in an event being fired in this view. As it is updated real-time, it's a great way to track changes to state.
 
-# Exercise 3: Metrics and dashboards
-
-In this exercise, we'll explore the third-party monitoring and metrics dashboards that are installed for free with OpenShift!
-
-## Grafana
-
-Red Hat OpenShift on IBM Cloud comes with [Grafana](https://grafana.com/) preinstalled. Get started by switching to the Administrator view:
-
-![Administrator](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/switch-to-admin.png)
-
-Then Navigate to `Monitoring > Dashboards` in the left-hand bar. You'll be asked to login with OpenShift and then click through some permissions.
-
-![Monitoring Dashboards](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/dashboard-menu.png)
-
-This will open up another proxy page, click `Log in with OpenShift`.
-
-Next, it will ask you for `Authorize Access`, take the default which is both checkboxes, and click `Allow selected permissions`.
-
-You should then see your Grafana dashboard. Hit `Home` on the top left, and choose `K8s / Compute Resources / Namespace (Pods)`.
-
-![Grafana](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/grafana-namespace.png)
-
-Choose the name of the project you created in [Step 1](exercise-2.md#deploy-example-health) - the same one that your application is running inside.
-
-You should be able to see the CPU and Memory usage for your application. In production environments, this is helpful for identifying the average amount of CPU or Memory your application uses, especially as it can fluctuate through the day. We'll use this information in the next exercise to set up auto-scaling for our pods.
-
-![Grafana also project](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/grafana-example-health.png)
-
-# Exercise 4: Scaling the application
+# Exercise 3: Scaling the application
 
 In this exercise, we'll leverage the metrics we've observed in the previous step to automatically scale our UI application in response to load.
 
@@ -332,7 +298,7 @@ Start simulating load by hitting the page several times, or running the script. 
 
 That's it! You now have a highly available and automatically scaled front-end Node.js application. OpenShift is automatically scaling your application pods since the CPU usage of the pods greatly exceeded `1`% of the resource limit, `30` millicores.
 
-# Exercise 5: Health checks
+# Exercise 4: Health checks
 
 In Kubernetes, liveness and readiness probes are essential for smoothly running applications.
 A probe is generally a REST `GET` call, but there are other types of probes available.
@@ -397,146 +363,25 @@ Dive into your events and you'll see that the probe is failing, causing the plat
 
 Using health checks gives your OpenShift service layer better reliability and helps you start with a strong foundation.
 
-# Exercise 6: Deploy a Node application with Build Config (CLI version)
+# Congratulations on deploying your first application on OpenShift
 
-In this exercise we'll revisit the application from exercise 1, except we'll use equivalent CLI commands to deploy our "Example Health" application.
+**Congratulations** on completing this lab, we hope you enjoyed it!
 
-From the IBM Cloud console launch the IBM Cloud Shell. Refer to our [Getting Starting](../pre-work/CLOUD_SHELL.md) material to learn how to access the IBM Cloud Shell.
+Here's a quick recap of what you did:
 
-## Deploy Example Health (CLI version)
+* Cloned a repository with sample code and a Dockerfile
+* Built and pushed a new image to OpenShift's internal registry
+* Deployed the application in a pod
+* Exposed the app with a route
 
-First, clone the *Example Health* source code and change to that directory.
-
-```bash
-git clone https://github.com/IBM/node-build-config-openshift
-cd node-build-config-openshift
-```
-
-Take note of the new `Dockerfile` in the application's root directory. We've pre-written it for you. But we've copied it here too, go through each line and read the corresponding comment.
-
-```Dockerfile
-# Use the official Node 10 image
-FROM node:10
-
-# Change directory to /usr/src/app
-WORKDIR /usr/src/app
-
-# Copy the application source code
-COPY . .
-
-# Change directory to site/
-WORKDIR site/
-
-# Install dependencies
-RUN npm install
-
-# Allow traffic on port 8080
-EXPOSE 8080
-
-# Start the application
-CMD [ "npm", "start" ]
-```
-
-Build your application's image by running the `oc new-build` command from your source code root directory. This will create a Build and an ImageStream of the app.
+Before moving on to the next lab let's clean up our workspace by running these commands:
 
 ```bash
-oc new-build --strategy docker --binary --docker-image node:10 --name example-health
+oc delete dc example-health
+oc delete svc example-health
+oc delete bc example-health
+oc delete route example-health
+oc delete imagestream example-health
 ```
 
-The output should look like below:
-
-```bash
-oc new-build --strategy docker --binary --docker-image node:10 --name example-health
---> Found Docker image aa64327 (3 weeks old) from Docker Hub for "node:10"
-
-    * An image stream tag will be created as "node:10" that will track the source image
-    * A Docker build using binary input will be created
-      * The resulting image will be pushed to image stream tag "example-health:latest"
-      * A binary build was created, use 'start-build --from-dir' to trigger a new build
-
---> Creating resources with label build=example-health ...
-    imagestream.image.openshift.io "node" created
-    imagestream.image.openshift.io "example-health" created
-    buildconfig.build.openshift.io "example-health" created
---> Success
-```
-
-Start a new build using the `oc start-build` command.
-
-```bash
-oc start-build example-health --from-dir . --follow
-```
-
-The output should look like below:
-
-```bash
-oc start-build example-health --from-dir . --follow
-Uploading directory "." as binary input for the build ...
-.
-Uploading finished
-build.build.openshift.io/example-health-1 started
-Receiving source from STDIN as archive ...
-Replaced Dockerfile FROM image node:10
-...
-Successfully built 11bff161eb8e
-
-Pushing image docker-registry.default.svc:5000/example-health-ns/example-health:latest ...
-Pushed 0/12 layers, 17% complete
-Pushed 1/12 layers, 42% complete
-...
-Pushed 11/12 layers, 100% complete
-Pushed 12/12 layers, 100% complete
-```
-
-Finally, deploy the application by running `oc new-app`.
-
-```bash
-oc new-app -i example-health
-```
-
-The output should look like below:
-
-```bash
-$ oc new-app -i example-health
---> Found image 11bff16 (8 minutes old) in image stream "example-health-ns/example-health" under tag "latest" for "example-health"
-
-    * This image will be deployed in deployment config "example-health"
-    * Port 8080/tcp will be load balanced by service "example-health"
-      * Other containers can access this service through the hostname "example-health"
-    * WARNING: Image "example-health-ns/example-health:latest" runs as the 'root' user which may not be permitted by your cluster administrator
-
---> Creating resources ...
-    deploymentconfig.apps.openshift.io "example-health" created
-    service "example-health" created
---> Success
-    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
-     'oc expose svc/example-health'
-    Run 'oc status' to view your app.
-```
-
-Expose the service using `oc expose`, a route will be created.
-
-```bash
-oc expose svc/example-health
-```
-
-Find the application's route by running `oc get routes`.
-
-```bash
-oc get routes
-```
-
-The output should look like below:
-
-```bash
-$ oc get routes
-
-NAME             HOST/PORT                                                                                                                        PATH      SERVICES         PORT       TERMINATION   WILDCARD
-example-health   example-health-example-health-ns.aida-dev-apps-10-30-f2c6cdc6801be85fd188b09d006f13e3-0001.us-south.containers.appdomain.cloud             example-health   8080-tcp                 None
-```
-
-Copy the URL into a browser and log into the site with `admin`:`test`.
-
-![Example Health details](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/example-health-app.png)
-
-**Congratulations** on completing this workshop!
+{: codeblock}
