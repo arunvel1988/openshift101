@@ -12,6 +12,84 @@ This workshop will show you a happy path to take advantage of most of the best p
 
 ---
 
+# Exercise 0: Playing with Kubernetes
+
+Check if the Kubernetes cluster is ready by running the command below to return the Kubernetes version.
+
+```bash
+kubectl version --short
+```
+
+{: codeblock}
+
+## Deploying a microservices app on Kubernetes
+
+The following command creates a [Kubernetes Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) called **my-app** from dewandemo/authors image (which is on Docker Hub).
+
+```bash
+kubectl create deployment my-app --image=index.docker.io/dewandemo/authors:v1
+```
+
+{: codeblock}
+
+One of the powerful feature of Kubernetes is the ability to scale your deployment up or down. The following command scales up **my-app** deployment to three [repliacas](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/).
+
+```bash
+kubectl scale deployment my-app --replicas=3
+```
+
+{: codeblock}
+
+Execute the following command to view the running pods:
+
+```bash
+kubectl get pods
+```
+
+{: codeblock}
+
+You should see a list like below:
+
+```bash
+my-app-cf48574d-6cssh      1/1     Running   0          10m
+my-app-cf48574d-c97hr      1/1     Running   0          9m4s
+my-app-cf48574d-pqssh      1/1     Running   0          9m4s
+```
+
+Delete one of the pods:
+
+```bash
+kubectl delete pods my-app-cf48574d-6cssh
+```
+
+{: codeblock}
+
+After few moments, execute the following command and you should still see three running pods.
+
+```bash
+kubectl get pods
+```
+
+Kubernetes deleted one of the pods but the deployment ensures a replica of three at all times so another pod was spun up.
+
+## Updating the deployment with newer version of image
+
+```bash
+kubectl set image deployment/my-app authors=index.docker.io/dewandemo/authors:v2
+```
+
+{: codeblock}
+
+This is how easily you can update a deployment to use a newer (or older) image.
+
+## Clean up
+
+```bash
+kubectl delete deployments my-app
+```
+
+{: codeblock}
+
 # Exercise 1: Deploy a Node application with Source-to-Image
 
 In this exercise, you'll deploy a simple Node.js Express application - "Example Health". Example Health is a simple UI for a patient health records system. We'll use this example to demonstrate key OpenShift features throughout this workshop. You can find the sample application GitHub repository here: [https://github.com/IBM/node-s2i-openshift](https://github.com/IBM/node-s2i-openshift)
