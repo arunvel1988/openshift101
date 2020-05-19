@@ -6,13 +6,21 @@ Welcome to our OpenShift 101 Lab
 
 OpenShift is an open source container application platform based on the Kubernetes container orchestrator for enterprise application development and deployment. In this workshop we'll be using an OpenShift cluster on IBM’s public cloud. OpenShift provides a way to empower developers to deploy code and not worry about the underlying ecosystem.
 
-This workshop will show you a happy path to take advantage of most of the best parts of OpenShift and what it can offer. Specifically, this quick lab will show how a developer can use OpenShift to deploy a sample Node.js application.
+This workshop will show you a happy path to take advantage of most of the best parts of OpenShift and what it can offer. Specifically, this quick lab will cover the following:
+
+1. Getting started with Kubernetes
+1. Deploy a Node application with Source-to-Image
+1. Updating the application with a Webhook
 
 **Let's get started!**
 
 ---
 
-# Exercise 0: Playing with Kubernetes
+# Exercise 0: Getting started with Kubernetes
+
+A Kubernetes cluster consists of a set of worker machines, called nodes, that run **containerized** applications. The worker node(s) host the Pods that are the components of the application workload. The control plane manages the worker nodes and the Pods in the cluster.
+
+## Checking access to a Kubernetes cluster
 
 Check if the Kubernetes cluster is ready by running the command below to return the Kubernetes version.
 
@@ -24,13 +32,15 @@ kubectl version --short
 
 ## Deploying a microservices app on Kubernetes
 
-The following command creates a [Kubernetes Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) called **my-app** from dewandemo/authors image (which is on Docker Hub).
+The following command creates a [Kubernetes Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) called **my-app** from [`dewandemo/authors`](https://hub.docker.com/r/dewandemo/authors) image (which is on Docker Hub).
 
 ```bash
 kubectl create deployment my-app --image=index.docker.io/dewandemo/authors:v1
 ```
 
 {: codeblock}
+
+## Creating replicas
 
 One of the powerful feature of Kubernetes is the ability to scale your deployment up or down. The following command scales up **my-app** deployment to three [repliacas](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/).
 
@@ -48,13 +58,15 @@ kubectl get pods
 
 {: codeblock}
 
-You should see a list like below:
+You should see a list like the snippet below:
 
 ```bash
 my-app-cf48574d-6cssh      1/1     Running   0          10m
 my-app-cf48574d-c97hr      1/1     Running   0          9m4s
 my-app-cf48574d-pqssh      1/1     Running   0          9m4s
 ```
+
+## Self-healing of Kubernetes
 
 Delete one of the pods:
 
@@ -70,9 +82,11 @@ After few moments, execute the following command and you should still see three 
 kubectl get pods
 ```
 
+{: codeblock}
+
 Kubernetes deleted one of the pods but the deployment ensures a replica of three at all times so another pod was spun up.
 
-## Updating the deployment with newer version of image
+## Updating the deployment to a newer image version
 
 ```bash
 kubectl set image deployment/my-app authors=index.docker.io/dewandemo/authors:v2
@@ -90,25 +104,33 @@ kubectl delete deployments my-app
 
 {: codeblock}
 
+## Understanding What Happened
+
+We covered the following:
+
+* Pods were created from a publicly accessible image on DockerHub.
+* We showed that pods are automatically re-created.
+* Builds are pushed to OpenShift's internal regitry.
+* You can use `kubectl scale deployment` to create replicas.
+* You can use `kubectl set image` to deploy a new image version.
+
+Now let's see how OpenShift can make this easier!
+
 # Exercise 1: Deploy a Node application with Source-to-Image
 
 In this exercise, you'll deploy a simple Node.js Express application - "Example Health". Example Health is a simple UI for a patient health records system. We'll use this example to demonstrate key OpenShift features throughout this workshop. You can find the sample application GitHub repository here: [https://github.com/IBM/node-s2i-openshift](https://github.com/IBM/node-s2i-openshift)
 
 ## Deploy Example Health
 
-Access your cluster's web console by clicking the `OpenShift Console` button on the top-right. Here is the main dashboard you should see.
+Access your cluster's web console by clicking the `OpenShift Console` button on the top-right.
 
-![Main Dashboard](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/main-dashboard.png)
+![Launch Console](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/snl-launch-console.png)
 
-You should see a view that looks like this.
+From the console's landing page, click on "+Add".
 
-![New Project View](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/example-health-new-project.png)
+![Project Details](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/snl-project-details.png)
 
-Now click on "Administrator" and select "Developer.
-
-![Developer](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/change-to-developer.png)
-
-Click on the browse catalog button.
+From the "Add" page, choose to add a new item "From Catalog".
 
 ![Catalog](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/developer-catalog.png)
 
@@ -148,9 +170,9 @@ Congrats! You've deployed a `Node.js` app to Kubernetes using OpenShift Source-t
 
 [S2I](https://docs.openshift.com/container-platform/3.6/architecture/core_concepts/builds_and_image_streams.html#source-build) is a framework that creates container images from source code, then runs the assembled images as containers. It allows developers to build reproducible images easily, letting them spend time on what matters most, developing their code!
 
-## Git Webhooks
+# 2. Updating the application with a Webhook
 
-So far we have been doing alot of manual deployment. In cloud-native world we want to move away from manual work and move toward automation. Wouldn't it be nice if our application rebuilt on git push events? Git webhooks are the way its done and openshift comes bundled in with git webhooks. Let's set it up for our project.
+So far we have been doing a lot of manual deployment. In a cloud-native world we want to move away from manual work and move toward automation. Wouldn't it be nice if our application rebuilt on git push events? Git webhooks are the way its done and openshift comes bundled in with git webhooks. Let's set it up for our project.
 
 To be able to setup git webhooks, we need to have elevated permission to the project. We don't own the repo we have been using so far. But since its opensource we can easily fork it and make it our own.
 
@@ -158,13 +180,13 @@ Fork the repo at [https://github.com/IBM/node-s2i-openshift](https://github.com/
 
 ![Fork](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/fork.png)
 
-Now that I have forked the repo under my repo I have full admin priviledges. As you can see I now have a settings button that I can change the repo settings with.
+Now that I have forked the repo under my repo I have full admin privileges. As you can see I now have a settings button that I can change the repo settings with.
 
 ![Forked Repo](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/forked-repo.png)
 
 We will come back to this page in a moment. Lets change our git source to our repo.
 
-From our openshift dashboard for our project. Select `Builds`
+From our OpenShift dashboard for our project. Select `Builds`
 
 ![Build](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/nodejs-build-config.png)
 
