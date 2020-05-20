@@ -9,10 +9,9 @@ OpenShift is an open source container application platform based on the Kubernet
 This workshop will show you a happy path to take advantage of most of the best parts of OpenShift and what it can offer. Specifically, this quick lab will cover the following:
 
 * Getting started with Kubernetes
-* Deploy a Node application with Source-to-Image
-* Updating the application with a Webhook
-* Logging, the terminal, and events
-* Scaling the application
+* Deploying a Node.js application with Source-to-Image
+* Debugging via logging, the terminal, and events
+* Configuring our deployment by setting limits, scaling up, and using a config map
 
 **Let's get started!**
 
@@ -182,6 +181,8 @@ Congratulations! You've deployed a Node.js app to Kubernetes using OpenShift's S
 * The images are run as containers in pods.
 * Creating a new application in OpenShift allows the user to specify multiple options for Building, Deploying, Scaling, Limits, and Routing.
 
+<!--
+
 # Exercise 2: Updating the application with a Webhook
 
 So far we have been doing a lot of manual deployment. In a cloud-native world we want to move away from manual work and move toward automation. Wouldn't it be nice if our application rebuilt on git push events? Git webhooks are the way its done and openshift comes bundled in with git webhooks. Let's set it up for our project.
@@ -277,26 +278,31 @@ If you go to your new route you will see your change.
 
 ![UI](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/nodejs-rebuild-updated.png)
 
-# Exercise 3: Logs, terminal, and events
+-->
+
+# Exercise 2: Logs, terminal, and events
 
 In this exercise, we'll explore the out-of-the-box logging and events capabilities that are offered in OpenShift.
 
 ## Simulate Load on the Application
 
-First, let's simulate some load on our application. Run the following script which will endlessly spam our app with requests. Open a new terminal and enter the following:
+First, let's simulate some load on our application. Get the full URL of your application by running `oc get routes`:
+
+```bash
+oc get routes
+```
+
+Run the following script which will endlessly spam our app with requests. Open a new terminal and enter the following:
 
 ```bash
 while sleep 1; do curl -s <your_app_route>/info; done
 ```
 
-> **NOTE**: Retrieve the external URL from the OpenShift console, or from the URL of your Example Health application. Note that there may be an `/index.html` at the end that you need to replace with `/info`. We're hitting the /info endpoint which will trigger some logs from our app. For example:
-
-[`http://patientui-health-example.myopenshift-xxx.us-east.containers.appdomain.cloud/info`](http://patientui-health-example.myopenshift-341665-66631af3eb2bd8030c5bb56d415b8851-0001.us-east.containers.appdomain.cloud/jee.html)
-{% endhint %}
+> **NOTE**: Ensure you added `/info` to the end!
 
 ## OpenShift Logging
 
-Since we only created one pod, seeing our logs will be straight forward. Navigate to `View Logs` on the left on the main dashboard.
+Since we only created one pod, seeing our logs will be straight forward. Navigate to `View Logs` on the right on the main dashboard.
 
 ![Pods](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/view-logs.png)
 
@@ -322,6 +328,8 @@ ps aux
 
 ![Terminal](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/terminal-output.png)
 
+> **NOTE**: Try editing a file in the application source code to see what happens!
+
 ## OpenShift Events
 
 When deploying new apps, making configuration changes, or simply inspecting the state of your cluster, OpenShift gives you an overview of your running assets.
@@ -332,41 +340,142 @@ You can also dive in a bit deeper - the `Events` tab is very useful for identify
 
 You'll want to refer to this view throughout the lab. Almost all actions we take in in OpenShift will result in an event being fired in this view. As it is updated real-time, it's a great way to track changes to state.
 
-# Exercise 4: Scaling the application
+## Understanding What Happened
 
-In this exercise, we'll leverage the metrics we've observed in the previous step to automatically scale our UI application in response to load.
+* Application level logging via *Logging*
+* Deployment level logging via *Events*
+* Debugging by accessing the source code and running pods via *Terminal*
 
-## Enable Resource Limits
+# Exercise 3: Configuring the deployment
 
-Before we can setup autoscaling for our pods, we first need to set resource limits on the pods running in our cluster. Limits allows you to choose the minimum and maximum CPU and memory usage for a pod.
+In this exercise, we'll start to tweak our application's deployment.
 
-Hopefully you have your running script simulating load \(if not go [here](exercise-2.md#simulate-load-on-the-application)\), Our application is consuming anywhere between ".002" to ".02" cores. This translates to 2-20 "millicores".
+## Switch to the Administrator view
 
-That seems like a good range for our CPU request, but to be safe, let's bump the higher-end up to 30 millicores. In addition, the app consumes about `25`-`35` MB of RAM. Set the following resource limits for your deployment now.
+Switch to the **Administrator** view to access additional configuration options about your cluster.
 
-Switch to the **Administrator** view and then navigate to **Workloads > Deployments** in the left-hand bar. Choose the `patient-ui` Deployment, then choose **Actions > Edit Deployment**.
+![Choose deployment](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/switch-to-admin.png)
+
+## Select your deployment
+
+Navigate to the **Workloads** > **Deployments** choice in the left-hand bar. Choose the `node-s-2-i-openshift` Deployment.
 
 ![Deployments](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/ocp-deployments.png)
 
-In the YAML editor, go to line 44. In the section **template > spec > containers**, add the following resource limits into the empty resources. Replace the `resources {}`, and ensure the spacing is correct -- YAML uses strict indentation.
+## Enable Resource Limits
+
+Setting resource limits on the pods running in our cluster allows us to define the maximum CPU and memory usage for a pod.
+
+The sample application used consumes anywhere between **2m** - **20m** (millicores) of CPU and **25Mi** - **35Mi** MB of RAM.
+
+Let's bump the limits to **30m** of CPU and **100Mi** of RAM by choosing the **YAML** tab.
 
 ![Limits YAML](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/ocp-limits-yaml.png)
 
-  ```yaml
-             resources:
-               limits:
-                 cpu: 30m
-                 memory: 100Mi
-               requests:
-                 cpu: 3m
-                 memory: 40Mi
-  ```
+In the YAML editor find the `template.spec.containers.resources` section (around line 44), and add the following limits.
+
+```yaml
+            resources:
+              limits:
+                cpu: 30m
+                memory: 100Mi
+              requests:
+                cpu: 3m
+                memory: 40Mi
+```
+
+> **NOTE**: Replace the entire `resources: {}` section. Ensure the spacing is correct. YAML uses strict indentation.
 
 **Save** and **Reload** to see the new version.
 
-Verify that the replication controller has been changed by navigating to **Events**
+Verify that the replication controller has been changed by navigating to **Events**.
 
 ![Resource Limits](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/ocp-dc-events.png)
+
+## Scale up
+
+Let's now scale up the number of pods in our deployment. From the *Overview* tab click the *Up* arrow a few times to scale the application to a few replicas.
+
+![Scale up](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/increase-pods.png)
+
+After a few moments, the *Overview* tab should show additional pods running. Click on the *Pods* tab to see additional details of the pods.
+
+![Scale up](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/now-has-3-pods.png)
+
+## Deleting a Pod
+
+Remain on the *Pods* tab and let's delete one.
+
+![Delete a pod](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/delete-a-pod.png)
+
+Once a pod is deleted you'll see that a new pod is immediately re-created to take its place as defined by the number of replicas we have defined in our deployment.
+
+## Create a ConfigMap
+
+A **ConfigMap** is used to store data in key-value pairs. Pods can consume **ConfigMaps** as environment variables, command-line arguments, or as configuration files in a volume.
+
+A **ConfigMap** allows you to decouple environment-specific configuration from your container images, so that your applications are easily portable.
+
+Navigate to the **Workloads** > **Config Maps** choice in the left-hand bar. Choose to create a new one by clicking the **Create Config Map** button.
+
+![Config Map menu](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/config-map-menu.png)
+
+Give it a `name` and `data`, like the example below. **Your NAMESPACE will be different!**:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: node-s-2-i-openshift
+  namespace: sn-labs-stevemar
+data:
+  API_KEY: abc-123
+```
+
+![Create a Config Map](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/create-config-map.png)
+
+## Apply the Config Map to your deployment
+
+A config map in and of itself is not very useful. It must be applies to a deloyment. Let's go back to ours.
+
+Navigate to the **Workloads** > **Deployments** choice in the left-hand bar. Choose the `node-s-2-i-openshift` Deployment.
+
+From the **Environment** tab choose to apply the `node-s-2-i-openshift` Config Map by selecting it from the drop down list.
+
+![Choose to apply the Config Map](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/choose-config-map.png)
+
+Quickly switch back to the **Pods** tab to see the status of the pods.
+
+![Pods re-spinning](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/config-map-pods.png)
+
+If you switched over quickly enough you'll be able to see the original pods terminating and new pods being re-created. **Why**? Applying a new configuration (like applying a new config map) triggers a re-deployment.
+
+## Go to the terminal of a pod
+
+Choose any of the pods that are up and running.
+
+![Select a pod](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/select-a-pod.png)
+
+From the **Terminal** tab run the command:
+
+```bash
+env | grep API
+```
+
+To see the values of the **ConfigMap** you just applied.
+
+![See ConfigMap values](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/pod-terminal-config-map.png)
+
+## Understanding What Happened
+
+* Started to configure our deployment
+* Added limits to each pod
+* Scaled up pods, observed self-healing
+* Began to leverage environment variables via Config Maps
+
+<!--
+
+## NOT ENABLED in SNL yet
 
 ## Enable Autoscaler
 
@@ -415,16 +524,18 @@ Start simulating load by hitting the page several times, or running the script. 
 
 That's it! You now have a highly available and automatically scaled front-end Node.js application. OpenShift is automatically scaling your application pods since the CPU usage of the pods greatly exceeded `1`% of the resource limit, `30` millicores.
 
-# Congratulations on deploying your first application on OpenShift
+-->
+
+# Congratulations on completing the lab!
 
 **Congratulations** on completing this lab, we hope you enjoyed it!
 
-Here's a quick recap of what you did:
+Here's a quick recap of what was covered:
 
-* Cloned a repository with sample code and a Dockerfile
-* Built and pushed a new image to OpenShift's internal registry
-* Deployed the application in a pod
-* Exposed the app with a route
+* Getting started with Kubernetes
+* Deploying a Node.js application with Source-to-Image
+* Debugging via logging, the terminal, and events
+* Configuring our deployment by setting limits, scaling up, and using a config map
 
 Before moving on to the next lab let's clean up our workspace by running these commands:
 
@@ -434,6 +545,9 @@ oc delete svc node-s-2-i-openshift
 oc delete bc node-s-2-i-openshift
 oc delete route node-s-2-i-openshift
 oc delete imagestream node-s-2-i-openshift
+oc delete configmap node-s-2-i-openshift
+oc delete secret node-s-2-i-openshift-generic-webhook-secret
+oc delete secret node-s-2-i-openshift-github-webhook-secret
 ```
 
 {: codeblock}
