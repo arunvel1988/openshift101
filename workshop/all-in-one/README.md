@@ -432,7 +432,7 @@ data:
   API_KEY: abc-123
 ```
 
-![Create a Config Map](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/create-config-map.png)
+![Create a Config Map](https://raw.githubusercontent.com/IBM/openshift101/skills-network/workshop/.gitbook/assets/config-map-create.png)
 
 ## Apply the Config Map to your deployment
 
